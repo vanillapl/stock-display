@@ -10,7 +10,7 @@ from pyspark import SparkContext
 from pyspark.streaming import StreamingContext
 from pyspark.streaming.kafka import KafkaUtils
 from kafka import KafkaProducer
-from kafka.errors import KafkaError, KafkaTimeoutError
+from kafka.errors import (KafkaError, KafkaTimeoutError)
 
 logger_format = '%(asctime)-15s %(message)s'
 logging.basicConfig(format=logger_format)
@@ -35,20 +35,29 @@ def shutdown_hook(producer):
             logger.warn('close fails')
 
 
-def process(timeobj, rdd):
-    num = rdd.count()
-    if not num:
-        return
-    price_sum = rdd.map(lambda record: float(json.loads(record[1].decode('utf-8'))[0].get('LastTradePrice')))\
-        .reduce(lambda x, y: x + y)
-    price_avg = price_sum / num
-    logger.info('Received %d records, avg price is %f' % (num, price_avg))
+def process(stream):
+    def send_to_kafka(rdd):
+        results = rdd.collect()
+        for r in results:
+            data = json.dumps(
+                {
+                    'symbol': r[0],
+                    'timestamp': time.time(),
+                    'average': r[1]
+                }
+            )
+            try:
+                logger.info('Sending average price %s to kafka' % data)
+                kafka_producer.send(new_topic, value=data)
+            except KafkaError as error:
+                logger.warn('Failed to send average stock price to kafka, caused by: %s', error.message)
 
-    data = json.dumps({
-        'timestamp': time.time(),
-        'average': price_avg
-    })
-    kafka_producer.send(new_topic, value=data)
+    def pair(data):
+        record = json.loads(data[1].decode('utf-8'))[0]
+        return record.get('StockSymbol'), (float(record.get('LastTradePrice')), 1)
+
+    stream.map(pair).reduceByKey(lambda a, b: (a[0] + b[0], a[1] + b[1]))\
+        .map(lambda (k, v): (k, v[0]/v[1])).foreachRDD(send_to_kafka)
 
 if __name__ == '__main__':
 
@@ -64,7 +73,7 @@ if __name__ == '__main__':
 
     # - create data stream
     directKafkaStream = KafkaUtils.createDirectStream(ssc, [topic], {'metadata.broker.list': kafka_broker})
-    directKafkaStream.foreachRDD(process)
+    process(directKafkaStream)
 
     kafka_producer = KafkaProducer(bootstrap_servers=kafka_broker)
 

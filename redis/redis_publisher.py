@@ -48,4 +48,4 @@ if __name__ == '__main__':
         logger.info('Receive data: %s' % str(msg))
         redis_client.publish(redis_channel, msg.value)
 
-    atexit.register(shutdown_hook, consumer)
+    atexit.register(shutdown_hook, kafka_consumer)
