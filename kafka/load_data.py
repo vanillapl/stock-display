@@ -41,8 +41,8 @@ symbols = set()
 def shutdown_hook(producer):
     try:
         producer.flush(10)
-    except KafkaError as error:
-        logger.warn('finish flushing')
+    except KafkaError as e:
+        logger.warn('flushing error')
     finally:
         try:
             producer.close()
@@ -54,7 +54,7 @@ def shutdown_hook(producer):
 def fetch_price(symbol):
     try:
         prices = json.dumps(getQuotes(symbol))
-        logger.debug('get %s', prices)
+        # logger.debug('get %s', prices)
         producer.send(topic=topic_name, value=prices, timestamp_ms=time.time())
     except KafkaTimeoutError as timeoutError:
         logger.warn(timeoutError)
@@ -73,7 +73,7 @@ def add_stock(symbol):
     else:
         symbol = symbol.encode('utf-8')
         symbols.add(symbol)
-        logger.info('Add stock retrieve job %s' % symbol)
+        logger.info('Add stock retrieve for %s' % symbol)
         schedule.add_job(fetch_price, 'interval', [symbol], seconds=1, id=symbol)
     return jsonify(results=list(symbols)), 200
 
@@ -95,19 +95,3 @@ def del_stock(symbol):
 if __name__ == '__main__':
     atexit.register(shutdown_hook, producer)
     app.run(host='0.0.0.0', port=app.config['CONFIG_APPLICATION_PORT'])
-
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument('symbol')
-    # parser.add_argument('topic')
-    # parser.add_argument('kafka_broker')
-
-    # args = parser.parse_args()
-    # symbol = args.symbol
-    # topic_name = args.topic
-    # kafka_broker = args.kafka_broker
-    #
-    # schedule.every(1).second.do(fetch_price, producer, symbol)
-    #
-    # while True:
-    #     schedule.run_pending()
-    #     time.sleep(1)

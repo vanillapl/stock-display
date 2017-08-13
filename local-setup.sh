@@ -155,24 +155,24 @@ fi
 #
 # - run the kibana
 #
-echo "start kibana"
-RUNNING=$(docker inspect --format="{{ .State.Running }}" kibana 2> /dev/null)
-if [[ $? -eq 1 ]]; then
-
-    #
-    # - cannot find docker container named redis, create one
-    # - for docker run command options, see: https://docs.docker.com/engine/reference/run/
-    #
-    docker run \
-        -d \
-        -p 5601:5601 \
-        --name kibana \
-        -e ELASTICSEARCH_URL="http://${IP}:9200" \
-        kibana
-elif [[ ${RUNNING} == "false" ]]; then
-
-    #
-    # - otherwise, container exists but not running, start it
-    #
-    docker start kibana
-fi
+# echo "start kibana"
+# RUNNING=$(docker inspect --format="{{ .State.Running }}" kibana 2> /dev/null)
+# if [[ $? -eq 1 ]]; then
+#
+#     #
+#     # - cannot find docker container named redis, create one
+#     # - for docker run command options, see: https://docs.docker.com/engine/reference/run/
+#     #
+#     docker run \
+#         -d \
+#         -p 5601:5601 \
+#         --name kibana \
+#         -e ELASTICSEARCH_URL="http://${IP}:9200" \
+#         kibana
+# elif [[ ${RUNNING} == "false" ]]; then
+#
+#     #
+#     # - otherwise, container exists but not running, start it
+#     #
+#     docker start kibana
+# fi

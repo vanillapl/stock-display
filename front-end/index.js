@@ -19,8 +19,7 @@ redisclient.subscribe(subscribe_topic);
 console.log('Subscribing to redis topic %s', subscribe_topic);
 redisclient.on('message', function (channel, message) {
     if (channel == subscribe_topic) {
-        // io.sockets.emit('test', {hello: 'world'});
-        console.log('message received %s', message);
+        // console.log('message received %s', message);
         io.sockets.emit('data', message);
     }
 });
