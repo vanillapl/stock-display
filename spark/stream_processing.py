@@ -39,18 +39,16 @@ def process(stream):
     def send_to_kafka(rdd):
         results = rdd.collect()
         for r in results:
-            data = json.dumps(
-                {
+            data = json.dumps({
                     'symbol': r[0],
                     'timestamp': time.time(),
                     'average': round(r[1], 3)
-                }
-            )
+                })
             try:
-                logger.info('Sending average price %s to kafka' % data)
+                # logger.info('Sending average price %s to kafka' % data)
                 kafka_producer.send(new_topic, value=data)
             except KafkaError as error:
-                logger.warn('Failed to send average stock price to kafka, caused by: %s', error.message)
+                logger.warn('Failed to send data to kafka, caused by: %s', error.message)
 
     def pair(data):
         record = json.loads(data[1].decode('utf-8'))[0]

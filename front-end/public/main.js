@@ -7,6 +7,10 @@ $(function() {
     	newDataCallback(data);
     });
 
+    $("#show").on('click', function() {
+        $("#chart svg").toggle("slow");
+    });
+
     function newDataCallback(message) {
         "use strict";
         var parsed = JSON.parse(message);
@@ -88,17 +92,18 @@ $(function() {
     chart.yAxis
         .axisLabel('Price');
 
-    nv.addGraph(loadGraph);
+    window.setInterval(nv.addGraph(loadGraph), 5000);
 
     function loadGraph() {
         "use strict";
         d3.select('#chart svg')
             .datum(data_points)
             .transition()
-            .duration(5)
+            .duration(0)
             .call(chart);
-
-        nv.utils.windowResize(chart.update);
+        if($('#chart svg').is(":visible")) {
+            nv.utils.windowResize(chart.update);
+        }
         // console.log(chart);
         return chart;
     }

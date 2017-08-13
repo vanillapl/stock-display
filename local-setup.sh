@@ -6,6 +6,10 @@
 #
 MACHINE_NAME=$1
 
+docker-machine start ${MACHINE_NAME}
+
+eval $(docker-machine env ${MACHINE_NAME})
+
 #
 # - get the ip of target docker-machine
 #

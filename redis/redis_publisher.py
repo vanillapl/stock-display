@@ -45,7 +45,7 @@ if __name__ == '__main__':
     redis_client = redis.StrictRedis(host=redis_host, port=redis_port)
 
     for msg in kafka_consumer:
-        logger.info('Receive data: %s' % str(msg))
+        # logger.info('Receive data: %s' % str(msg))
         redis_client.publish(redis_channel, msg.value)
 
     atexit.register(shutdown_hook, kafka_consumer)
