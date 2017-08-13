@@ -4,7 +4,6 @@ $(function() {
 
     // - Whenever the server emits 'data', update the flow graph
     socket.on('data', function (data) {
-        console.log("AAS");
     	newDataCallback(data);
     });
 
@@ -18,7 +17,7 @@ $(function() {
         point.x = timestamp;
         point.y = average;
 
-        console.log(point);
+        // console.log(point);
 
         var i = getSymbolIndex(symbol, data_points);
 
@@ -48,7 +47,7 @@ $(function() {
         $(this).remove();
         var i = getSymbolIndex(symbol, data_points);
         data_points.splice(i, 1);
-        console.log(data_points);
+        // console.log(data_points);
     });
 
     $("#add-stock-button").click(function () {
@@ -70,7 +69,7 @@ $(function() {
             "<a class='stock-label list-group-item small'>" + symbol + "</a>"
         );
 
-        console.log(data_points);
+        // console.log(data_points);
     });
 
     var chart = nv.models.lineChart()
@@ -100,7 +99,7 @@ $(function() {
             .call(chart);
 
         nv.utils.windowResize(chart.update);
-        console.log(chart);
+        // console.log(chart);
         return chart;
     }
 

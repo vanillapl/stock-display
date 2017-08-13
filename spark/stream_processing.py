@@ -43,7 +43,7 @@ def process(stream):
                 {
                     'symbol': r[0],
                     'timestamp': time.time(),
-                    'average': r[1]
+                    'average': round(r[1], 3)
                 }
             )
             try:

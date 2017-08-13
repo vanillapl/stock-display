@@ -12,6 +12,7 @@ from flask import (
     request,
     jsonify
 )
+from flask_cors import CORS, cross_origin
 from kafka.errors import (
     KafkaError,
     KafkaTimeoutError
@@ -26,6 +27,7 @@ app = Flask(__name__)
 app.config.from_envvar('ENV_CONFIG_FILE')
 kafka_broker = app.config['CONFIG_KAFKA_ENDPOINT']
 topic_name = app.config['CONFIG_KAFKA_TOPIC']
+CORS(app)
 
 producer = KafkaProducer(bootstrap_servers=kafka_broker)
 
