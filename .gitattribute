@@ -1,2 +1,2 @@
-front-end/* linguist-vendored
+front-end/*.js linguist-vendored
 front-end/*.py linguist-vendored=false
