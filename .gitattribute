@@ -1,1 +1,2 @@
-front-end/public/* linguist-vendored
+front-end/public/*.js linguist-vendored
+K-line-display/*.js linguist-vendored
