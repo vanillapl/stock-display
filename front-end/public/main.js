@@ -1,15 +1,128 @@
 $(function() {
     var socket = io.connect();
     var data_points = [];
-
+    var symbol_list = [];
     // - Whenever the server emits 'data', update the flow graph
-    socket.on('data', function (data) {
+    socket.on('data', function(data) {
     	newDataCallback(data);
     });
 
-    $("#show").on('click', function() {
-        $("#chart svg").toggle("slow");
+    $('#chart-options').change(function() {
+        var option = $(this).val();
+        if(option == 1) {
+            $('#add-field').show();
+            $('#stock-list a').removeClass('active');
+            $('#k-container').hide('slow');
+            $('#chart svg').show('slow');
+        }
+        else if (option == 2) {
+            $('#add-field').hide();
+            $('#chart svg').hide('slow');
+            $('#k-container').show('slow');
+            if(symbol_list.length > 0) {
+                var symbol = symbol_list[0];
+                // console.log(symbol);
+                $('a:contains(' + symbol + ')').addClass('active');
+                var dateperiod = [2017,1,1,2017,1,9];
+                socket.emit('initpastdata', symbol, dateperiod);
+                socket.on('databack', function(data) {
+                    // console.log(data);
+                    showHistoricalData(symbol, data);
+                });
+            } else {
+                $('#k-container').text('NO DATA')
+            }
+        }
     });
+
+    function showHistoricalData(symbol, data) {
+        // split the data set into ohlc and volume
+        var ohlc = [],
+            volume = [],
+            dataLength = data.length,
+            // set the allowed units for data grouping
+            groupingUnits = [[
+                'week',                         // unit name
+                [1]                             // allowed multiples
+            ], [
+                'month',
+                [1, 2, 3, 4, 6]
+            ]],
+
+            i = 0;
+
+        for (i; i < dataLength; i += 1) {
+            ohlc.push([
+                data[i][0], // the date
+                data[i][1], // open
+                data[i][2], // high
+                data[i][3], // low
+                data[i][4] // close
+            ]);
+
+            volume.push([
+                data[i][0], // the date
+                data[i][5] // the volume
+            ]);
+        }
+
+        // create the chart
+        Highcharts.stockChart('k-container', {
+
+            rangeSelector: {
+                selected: 1
+            },
+
+            title: {
+                text: symbol + ' Historical'
+            },
+
+            yAxis: [{
+                labels: {
+                    align: 'right',
+                    x: -3
+                },
+                title: {
+                    text: 'OHLC'
+                },
+                height: '60%',
+                lineWidth: 2
+            }, {
+                labels: {
+                    align: 'right',
+                    x: -3
+                },
+                title: {
+                    text: 'Volume'
+                },
+                top: '65%',
+                height: '35%',
+                offset: 0,
+                lineWidth: 2
+            }],
+
+            tooltip: {
+                split: true
+            },
+
+            series: [{
+                type: 'candlestick',
+                name: symbol,
+                data: ohlc,
+                dataGrouping: {
+                    units: groupingUnits
+                }
+            }, {
+                type: 'column',
+                name: 'Volume',
+                data: volume,
+                yAxis: 1,
+                dataGrouping: {
+                    units: groupingUnits
+                }
+            }]
+        });
+    }
 
     function newDataCallback(message) {
         "use strict";
@@ -41,17 +154,32 @@ $(function() {
     $("#chart").height($(window).height() - $("#header").height() * 2);
 
     $(document.body).on('click', '.stock-label', function () {
-        "use strict";
-        var symbol = $(this).text();
-        $.ajax({
-            url: 'http://localhost:5000/' + symbol,
-            type: 'DELETE'
-        });
+        var option = $('#chart-options').val();
+        if(option == 1) {
+            var symbol = $(this).text();
+            $.ajax({
+                url: 'http://localhost:5000/' + symbol,
+                type: 'DELETE'
+            });
 
-        $(this).remove();
-        var i = getSymbolIndex(symbol, data_points);
-        data_points.splice(i, 1);
-        // console.log(data_points);
+            $(this).remove();
+            var index = symbol_list.indexOf(symbol);
+            if (index > -1) {
+                symbol_list.splice(index, 1);
+            }
+            var i = getSymbolIndex(symbol, data_points);
+            data_points.splice(i, 1);
+        }
+        if(option == 2) {
+            $(this).addClass('active').siblings().removeClass('active');
+            var symbol = $(this).text();
+            var dateperiod = [2017,1,1,2017,1,9];
+            socket.emit('initpastdata', symbol, dateperiod);
+            socket.on('databack', function(data) {
+                // console.log(data);
+                showHistoricalData(symbol, data);
+            });
+        }
     });
 
     $("#add-stock-button").click(function () {
@@ -72,7 +200,7 @@ $(function() {
         $("#stock-list").append(
             "<a class='stock-label list-group-item small'>" + symbol + "</a>"
         );
-
+        symbol_list.push(symbol)
         // console.log(data_points);
     });
 
@@ -92,16 +220,16 @@ $(function() {
     chart.yAxis
         .axisLabel('Price');
 
-    window.setInterval(nv.addGraph(loadGraph), 5000);
-
+    // window.setInterval(nv.addGraph(loadGraph), 5000);
+    nv.addGraph(loadGraph);
     function loadGraph() {
         "use strict";
         d3.select('#chart svg')
             .datum(data_points)
             .transition()
-            .duration(0)
+            .duration(5)
             .call(chart);
-        if($('#chart svg').is(":visible")) {
+        if($('#chart-options').val() == 1) {
             nv.utils.windowResize(chart.update);
         }
         // console.log(chart);

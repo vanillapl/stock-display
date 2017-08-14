@@ -4,7 +4,6 @@ var port = argv['port'];
 var redis_host = argv['redis_host'];
 var redis_port = argv['redis_port'];
 var subscribe_topic = argv['subscribe_topic'];
-
 // - setup dependency instances
 var express = require('express');
 var app = express();
@@ -34,6 +33,41 @@ app.use('/bootstrap', express.static(__dirname + '/node_modules/bootstrap/dist')
 server.listen(port, function () {
     console.log('Server started at port %d.', port);
 });
+
+io.on('connect', function(socket){
+    socket.on('initpastdata', function(symbol, dateperiod) {
+        // console.log("received time period"+dateperiod);
+        getHistoricalData(symbol, dateperiod, function(data) {
+            // console.log(data);
+            socket.emit('databack', data);
+        });
+    })
+});
+
+function getHistoricalData(symbol, dateperiod, callback) {
+    var [sy, sm, sd, ey, em, ed] = dateperiod;
+    var spawn = require("child_process").spawn;
+    var py = spawn('python',["fi.py", symbol, sy, sm, sd, ey, em, ed]);
+    var data = []
+    py.stdout.on('data', function(d){
+        var s = d.toString().substring(1, d.length-1).split('], [')
+        // console.log(s[0])
+        s[0] = s[0].substring(1)
+        s[s.length-1] = s[s.length-1].slice(0,-1)
+        for(var i = 0; i < s.length; i++){
+            var ss = s[i].split(',')
+            tmp = []
+            for(var j = 0; j < ss.length; j++){
+                tmp.push(parseFloat(ss[j]));
+            }
+            data.push(tmp)
+        }
+    });
+    py.stdout.on('end', function(){
+        // console.log(data);
+        callback(data)
+    });
+}
 
 // - setup shutdown hooks
 var shutdown_hook = function () {
