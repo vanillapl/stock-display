@@ -14,5 +14,12 @@ For easy distribution, this program runs on a docker machine. To set up the envi
 After installing docker, setting up a docker machine (e.g. naming "stockdisplay")
 
 ```sh
-docker-machine create --driver virtualbox --virtualbox-cpu-count 2 --virtualbox-memory 2048 bigdata
+docker-machine create --driver virtualbox --virtualbox-cpu-count 2 --virtualbox-memory 2048 stockdisplay
 ```
+
+Then run setup script
+
+```sh
+./local-setup.sh stockdisplay
+```
+
