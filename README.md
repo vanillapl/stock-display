@@ -19,6 +19,7 @@ After installing docker, setting up a docker machine (e.g. naming "stockdisplay"
 
 ```sh
 pip install requirement.txt
+
 docker-machine create --driver virtualbox --virtualbox-cpu-count 2 --virtualbox-memory 2048 stockdisplay
 ```
 
@@ -57,6 +58,7 @@ Direct into **/front-end** folder, then run setup script:
 
 ```sh
 npm install
+
 ./start-nodejs.sh stockdisplay
 ```
 
