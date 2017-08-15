@@ -58,4 +58,4 @@ Direct into **/front-end** folder, then run setup script:
 ./start-nodejs.sh stockdisplay
 ```
 
-When seeing the terminal output *server start on port 8080*, it shows that the app starts working. Final step open browser and directs to *localhost:8080*
+When seeing the terminal output ***server start on port 8080***, it shows that the app starts working. Final step is to open browser and directs to ***localhost:8080***
