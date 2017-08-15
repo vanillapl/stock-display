@@ -24,9 +24,9 @@ logger = logging.getLogger('load-data-log')
 logger.setLevel(logging.DEBUG)
 
 app = Flask(__name__)
-app.config.from_envvar('ENV_CONFIG_FILE')
-kafka_broker = app.config['CONFIG_KAFKA_ENDPOINT']
-topic_name = app.config['CONFIG_KAFKA_TOPIC']
+# app.config.from_envvar('ENV_CONFIG_FILE')
+kafka_broker = '192.168.99.100:9092'
+topic_name = 'stock-analyzer'
 CORS(app)
 
 producer = KafkaProducer(bootstrap_servers=kafka_broker)
@@ -93,5 +93,14 @@ def del_stock(symbol):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('topic_name')
+    parser.add_argument('kafka_broker')
+    parser.add_argument('kafka_port')
+
+    args = parser.parse_args()
+    topic_name = args.topic_name
+    kafka_broker = args.kafka_broker
+    kafka_port = args.kafka_port
     atexit.register(shutdown_hook, producer)
-    app.run(host='0.0.0.0', port=app.config['CONFIG_APPLICATION_PORT'])
+    app.run(host='0.0.0.0', port=kafka_port)

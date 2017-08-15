@@ -13,11 +13,11 @@ $(function() {
             $('#add-field').show();
             $('#stock-list a').removeClass('active');
             $('#k-container').hide('slow');
-            $('#chart svg').show('slow');
+            $('#r-container svg').show('slow');
         }
         else if (option == 2) {
             $('#add-field').hide();
-            $('#chart svg').hide('slow');
+            $('#r-container svg').hide('slow');
             $('#k-container').show('slow');
             if(symbol_list.length > 0) {
                 var symbol = symbol_list[0];
@@ -224,7 +224,7 @@ $(function() {
     nv.addGraph(loadGraph);
     function loadGraph() {
         "use strict";
-        d3.select('#chart svg')
+        d3.select('#r-container svg')
             .datum(data_points)
             .transition()
             .duration(5)
