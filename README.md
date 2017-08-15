@@ -13,7 +13,7 @@ I'm no good at writing sample / filler text, so go write something yourself.
 
 # Local setup guide
 
-For easy distribution, this program runs on a docker machine. To set up the environment, first you need to install **Docker**. Install guide can be found [here](https://docs.docker.com/docker-for-mac/install/)
+For easy distribution, this program runs on a *docker machine*. To set up the environment, first you need to install *Docker*. Install guide can be found [here](https://docs.docker.com/engine/installation/)
 
 After installing docker, setting up a docker machine (e.g. naming "stockdisplay"):
 
