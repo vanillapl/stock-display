@@ -7,10 +7,6 @@ A stock display platform showing both **real-time prices** and historical **cand
  * Real-time data from [google finance API](https://pypi.python.org/pypi/googlefinance), historical data from [pandas-datareader](https://pandas-datareader.readthedocs.io/en/latest/)
  * Chart drawing using [d3.js](https://d3js.org/) and [highcharts](https://www.hhighcharts.com)
 
-
-I'm no good at writing sample / filler text, so go write something yourself.
-
-
 # Local setup guide
 
 For easy distribution, this program runs on a *docker machine*. To set up the environment, first you need to install *Docker*. Installation guide can be found [here](https://docs.docker.com/engine/installation/)
