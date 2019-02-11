@@ -1,6 +1,6 @@
 APScheduler==3.3.1
 cassandra-driver==3.10
-Flask==0.12.2
+flask>=0.12.3
 Flask-Cors==3.0.3
 futures==3.1.1
 googlefinance==0.7
