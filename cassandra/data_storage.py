@@ -1,62 +1,55 @@
-"""
-read from Kafka, write to Cassandra table
-"""
-
 import argparse
+import atexit
 import json
 import logging
-
-import atexit
 from cassandra.cluster import Cluster
 from kafka import KafkaConsumer
-from kafka.errors import KafkaError, KafkaTimeoutError
-
-logger_format = '%(asctime)-15s %(message)s'
-logging.basicConfig(format=logger_format)
-logger = logging.getLogger('store-data-log')
-logger.setLevel(logging.DEBUG)
-
-topic_name = 'stock_analyzer'
-kafka_broker = '127.0.0.1:9092'
-keyspace = 'stock'
-data_table = ''
-cassandra_broker = '127.0.0.1:9042'
 
 
-def shutdown_hook(consumer, session):
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
+def shutdown_hook(kafka_consumer: KafkaConsumer, kafka_session: Cluster) -> None:
+    """
+    This function saves stock data to Cassandra.
+
+    :param stock_data: The stock data to save.
+    :param cassandra_session: The Cassandra session to use.
+    :return: None
+    """
     try:
-        consumer.close()
-        session.shutdown()
+        kafka_consumer.close()
+        kafka_session.shutdown()
         logger.info('closed')
-    except Exception as e:
-        logger.warn('close fails')
+    except Exception as exception:
+        logger.warning('close fails: %s', exception)
 
 
-def persist_data(stock_data, cassandra_session):
+def persist_data(stock_data: str, cassandra_session: Cluster) -> None:
     """
 
-    :param stock_data: 
-    :param cassandra_session: 
-    :return: 
+    :param stock_data:
+    :param cassandra_session:
+    :return:
     """
     # logger.debug(stock_data)
     parse = json.loads(stock_data)[0]
     symbol = parse.get('StockSymbol')
     price = float(parse.get('LastTradePrice'))
     tradetime = parse.get('LastTradeDateTime')
-    sql = "INSERT INTO %s (stock_symbol, trade_time, trade_price) VALUES ('%s', '%s', %f)" \
-          % (data_table, symbol, tradetime, price)
+    sql = f'INSERT INTO {data_table} (stock_symbol, trade_time, trade_price) VALUES ({symbol}, {tradetime}, {price})'
     cassandra_session.execute(sql)
-    logger.info('data written into cassandra %s' % (symbol))
+    logger.info('data written into cassandra %s', symbol)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('topic')
-    parser.add_argument('kafka_broker')
-    parser.add_argument('keyspace')
-    parser.add_argument('data_table')
-    parser.add_argument('cassandra_broker')
+    parser.add_argument('topic', type=str)
+    parser.add_argument('kafka_broker', type=str)
+    parser.add_argument('keyspace', type=str)
+    parser.add_argument('data_table', type=str)
+    parser.add_argument('cassandra_broker', type=str)
 
     # - parse arguments
     args = parser.parse_args()
