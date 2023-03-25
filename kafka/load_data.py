@@ -74,7 +74,8 @@ def add_stock(symbol):
         symbol = symbol.encode('utf-8')
         symbols.add(symbol)
         logger.info('Add stock retrieve for %s' % symbol)
-        schedule.add_job(fetch_price, 'interval', [symbol], seconds=1, id=symbol, max_instances=10)
+        schedule.add_job(fetch_price, 'interval', [
+                         symbol], seconds=1, id=symbol, max_instances=10)
     return jsonify(results=list(symbols)), 200
 
 

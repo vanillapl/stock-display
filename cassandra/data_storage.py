@@ -34,7 +34,7 @@ def shutdown_hook(consumer, session):
 
 def persist_data(stock_data, cassandra_session):
     """
-    
+
     :param stock_data: 
     :param cassandra_session: 
     :return: 

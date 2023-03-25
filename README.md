@@ -20,7 +20,7 @@ docker-machine create --driver virtualbox --virtualbox-cpu-count 2 --virtualbox-
 Then run setup script:
 
 ```sh
-pip install requirement.txt
+pip install -r requirement.txt
 
 ./local-setup.sh stockdisplay
 ```

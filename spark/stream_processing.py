@@ -22,6 +22,7 @@ new_topic = ""
 kafka_broker = ""
 kafka_producer = None
 
+
 def shutdown_hook(producer):
     try:
         producer.flush(10)
@@ -40,15 +41,16 @@ def process(stream):
         results = rdd.collect()
         for r in results:
             data = json.dumps({
-                    'symbol': r[0],
-                    'timestamp': time.time(),
-                    'average': round(r[1], 3)
-                })
+                'symbol': r[0],
+                'timestamp': time.time(),
+                'average': round(r[1], 3)
+            })
             try:
                 # logger.info('Sending average price %s to kafka' % data)
                 kafka_producer.send(new_topic, value=data)
             except KafkaError as error:
-                logger.warn('Failed to send data to kafka, caused by: %s', error.message)
+                logger.warn(
+                    'Failed to send data to kafka, caused by: %s', error.message)
 
     def pair(data):
         record = json.loads(data[1].decode('utf-8'))[0]
@@ -56,6 +58,7 @@ def process(stream):
 
     stream.map(pair).reduceByKey(lambda a, b: (a[0] + b[0], a[1] + b[1]))\
         .map(lambda (k, v): (k, v[0]/v[1])).foreachRDD(send_to_kafka)
+
 
 if __name__ == '__main__':
 
@@ -70,7 +73,8 @@ if __name__ == '__main__':
     ssc = StreamingContext(sc, 5)
 
     # - create data stream
-    directKafkaStream = KafkaUtils.createDirectStream(ssc, [topic], {'metadata.broker.list': kafka_broker})
+    directKafkaStream = KafkaUtils.createDirectStream(
+        ssc, [topic], {'metadata.broker.list': kafka_broker})
     process(directKafkaStream)
 
     kafka_producer = KafkaProducer(bootstrap_servers=kafka_broker)
